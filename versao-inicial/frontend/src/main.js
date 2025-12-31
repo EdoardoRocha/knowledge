@@ -1,9 +1,11 @@
-import Vue from 'vue'
+import { createApp } from "vue";
+import App from './App.vue';
 
-import App from './App'
+const app = createApp(App);
 
-Vue.config.productionTip = false
+//Importando o CSS Global
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import '@fortawesome/fontawesome-free/css/all.css';
 
-new Vue({
-  render: h => h(App)
-}).$mount('#app')
+app.mount("#app")
