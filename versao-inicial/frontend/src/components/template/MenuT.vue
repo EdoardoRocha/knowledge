@@ -1,10 +1,17 @@
 <template>
-  <aside class="menu"></aside>
+  <aside class="menu" v-show="isMenuVisible"></aside>
 </template>
 
 <script>
+import { mapState } from 'pinia';
+import { useAuthStore } from '@/config/store';
+
+
 export default {
-  name: "MenuT"
+  name: "MenuT",
+  computed: {
+    ...mapState(useAuthStore, ['isMenuVisible'])
+  }
 }
 </script>
 
