@@ -3,16 +3,16 @@
     <div class="user-button">
       <span class="d-none d-sm-block">{{ user?.name }}</span>
       <div class="user-dropdown-img">
-        <img :src="gravatarUrl" alt="User">
+        <img :src="gravatarUrl" alt="User" />
       </div>
       <i class="fa fa-angle-down"></i>
     </div>
     <div class="user-dropdown-content">
-      <router-link to="/admin">
+      <router-link to="/admin" v-if="user?.admin">
         <i class="fa fa-cogs"></i>
         Administração
       </router-link>
-      <router-link to="">
+      <router-link to="" @click.prevent="logout">
         <i class="fa fa-sign-out"></i>
         Sair
       </router-link>
@@ -21,19 +21,30 @@
 </template>
 
 <script>
+import { userKey } from '@/global'
 import { mapState } from 'pinia'
-import md5 from 'blueimp-md5';
+import md5 from 'blueimp-md5'
 import { useAuthStore } from '@/config/store'
+
 
 export default {
   name: 'UserDropdown',
-  computed: { ...mapState(useAuthStore, ['user']),
+  computed: {
+    ...mapState(useAuthStore, ['user']),
 
     gravatarUrl() {
       const email = this.user?.email || ''
       const hash = md5(email.trim().toLowerCase())
       return `https://www.gravatar.com/avatar/${hash}?d=wavatar`
-    }
+    },
+  },
+  methods: {
+    logout() {
+      const authStore = useAuthStore()
+      localStorage.removeItem(userKey)
+      authStore.setUser(null)
+      this.$router.push({ name: 'auth' })
+    },
   },
 }
 </script>
@@ -80,10 +91,12 @@ export default {
 
   visibility: hidden;
   opacity: 0;
-  transition: visibility 0s, opacity 0.5s linear;
+  transition:
+    visibility 0s,
+    opacity 0.5s linear;
 }
 
-.user-dropdown:hover .user-dropdown-content{
+.user-dropdown:hover .user-dropdown-content {
   visibility: visible;
   opacity: 1;
 }
@@ -91,10 +104,10 @@ export default {
 .user-dropdown-content a {
   text-decoration: none;
   color: #000;
-  padding: 10px ;
+  padding: 10px;
 }
 
 .user-dropdown-content a:hover {
-  background-color: #EDEDED;
+  background-color: #ededed;
 }
 </style>

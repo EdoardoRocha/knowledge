@@ -1,19 +1,23 @@
 <template>
-  <div id="app" :class="{ 'hide-menu': !isMenuVisible }">
-    <HeaderT title="Cod3r - Base de conhecimento" :hideToggle="false" :hideUserDropdown="false"/>
-    <MenuT v-show="user"/>
-    <ContentT />
+  <div id="app" :class="{ 'hide-menu': !isMenuVisible || !user }">
+    <HeaderT title="Cod3r - Base de conhecimento" :hideToggle="!user" :hideUserDropdown="!user" />
+    <MenuT v-if="user" />
+    <Loading v-if="validatingToken" />
+    <ContentT v-else />
     <FooterT />
   </div>
 </template>
 
 <script>
+import axios from 'axios'
+import { baseApiUrl, userKey } from './global'
 import HeaderT from '@/components/template/HeaderT.vue'
 import MenuT from '@/components/template/MenuT.vue'
 import ContentT from '@/components/template/ContentT.vue'
 import FooterT from '@/components/template/FooterT.vue'
 import { mapState } from 'pinia'
 import { useAuthStore } from '@/config/store'
+import Loading from './components/template/Loading.vue'
 
 export default {
   name: 'App',
@@ -22,9 +26,66 @@ export default {
     MenuT,
     ContentT,
     FooterT,
+    Loading,
   },
   computed: {
     ...mapState(useAuthStore, ['isMenuVisible', 'user']),
+  },
+  data: function () {
+    return {
+      validatingToken: true,
+    }
+  },
+  methods: {
+    async validateToken() {
+      const authStore = useAuthStore()
+      this.validatingToken = true
+
+      const json = localStorage.getItem(userKey)
+      const userData = JSON.parse(json)
+
+      if (!userData) {
+        this.validatingToken = false
+        // Correção: usar $route em vez de $router para checar o nome
+        if (this.$route.name !== 'auth') {
+          this.$router.push({ name: 'auth' })
+        }
+        return
+      }
+
+      try {
+        // Valida o token no backend
+        const res = await axios.post(`${baseApiUrl}/validateToken`, userData)
+
+        if (res.data) {
+          authStore.setUser(userData)
+
+          if (this.$route.name === 'auth') this.$router.push({ path: '/' })
+        } else {
+          localStorage.removeItem(userKey)
+          authStore.setUser(null)
+          this.$router.push({ name: 'auth' })
+        }
+      } catch (e) {
+        // Se houver erro de rede/servidor, limpa e desloga por segurança
+        localStorage.removeItem(userKey)
+        authStore.setUser(null)
+        if (this.$route.name !== 'auth') this.$router.push({ name: 'auth' })
+      } finally {
+        // Garante que o spinner de Loading saia da tela
+        this.validatingToken = false
+      }
+    },
+  },
+  mounted() {
+    this.validateToken()
+
+    const authStore = useAuthStore()
+    window.addEventListener('resize', () => {
+      authStore.setIsMobile(window.innerWidth <= 768)
+    })
+  }, unmounted() {
+    window.removeEventListener('resize', () => {})
   },
 }
 </script>
