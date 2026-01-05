@@ -1,9 +1,8 @@
 import { useToast } from 'vue-toastification'
 const toast = useToast()
 
-
 export const userKey = '__knowledge_user'
-export const baseApiUrl = 'http://localhost:3000'
+export const baseApiUrl = 'http://18.231.168.74:3000'
 
 export function showError(e) {
   if (e && e.response && e.response.data) {

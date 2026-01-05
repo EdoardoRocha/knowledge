@@ -4,6 +4,7 @@ const consign = require("consign");
 const db = require('./config/db.js');
 const mongoose = require('mongoose');
 require('./config/mongodb.js');
+require('dotenv').config();
 
 app.db = db;
 app.mongoose = mongoose;
@@ -18,6 +19,7 @@ consign()
     .into(app)
 
 
-app.listen(3000, () => {
-    console.log("Backend executando...")
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log("Backend executando na porta " + port )
 })

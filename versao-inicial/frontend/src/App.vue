@@ -1,6 +1,6 @@
 <template>
   <div id="app" :class="{ 'hide-menu': !isMenuVisible || !user }">
-    <HeaderT title="Cod3r - Base de conhecimento" :hideToggle="!user" :hideUserDropdown="!user" />
+    <HeaderT title="MoguU - Base de conhecimento" :hideToggle="!user" :hideUserDropdown="!user" />
     <MenuT v-if="user" />
     <Loading v-if="validatingToken" />
     <ContentT v-else />
